@@ -1,5 +1,6 @@
 ﻿using Domain.DTO_s.MentorDTO;
 using Domain.DTO_s.StudentDTO;
+using Domain.Filters;
 using Domain.Response;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Infrastructure.Services.MentorService
 {
     public interface IMentorService
     {
-        Task<Response<List<GetMentorDto>>> GetMentorsAsync(); 
+        Task<PageResponse<List<GetMentorDto>>> GetMentorsAsync(MentorFilter filter); 
         Task<Response<GetMentorDto>> GetMentorByIdsAsync(int mentorId);
         Task<Response<string>> AddMentorAsync(AddMentorDto mentor);
         Task<Response<string>> UpdateMentorAsync(UpdateMentorDto mentor);

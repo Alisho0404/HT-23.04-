@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using Domain.Enteties;
+using Domain.Filters;
 
 namespace Infrastructure.Services.MentorService
 {
@@ -76,18 +77,31 @@ namespace Infrastructure.Services.MentorService
 
         }
 
-        public async Task<Response<List<GetMentorDto>>> GetMentorsAsync()
+        public async Task<PageResponse<List<GetMentorDto>>> GetMentorsAsync(MentorFilter filter)
         {
             try
             {
-                var mentor = await _context.Mentors.ToListAsync();
-                var mapped = _mapper.Map <List<GetMentorDto>>(mentor); 
-                return new Response<List<GetMentorDto>>(mapped);
+                var mentors = _context.Mentors.AsQueryable();
+                if (!string.IsNullOrEmpty(filter.Address))
+                {
+                    mentors = mentors.Where(x => x.Address.ToLower().Contains(filter.Address.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filter.Email))
+                {
+                    mentors = mentors.Where(x => x.Email.ToLower().Contains(filter.Email.ToLower()));
+                } 
+                var response=await mentors
+                    .Skip((filter.PageNumber-1)*filter.PageSize)
+                    .Take(filter.PageSize).ToListAsync();
+                var totalRecord = mentors.Count(); 
+                
+                var mapped=_mapper.Map<List<GetMentorDto>>(response);
+                return new PageResponse<List<GetMentorDto>>(mapped,filter.PageNumber,filter.PageSize,totalRecord);
             }
             catch (Exception e)
             {
 
-                return new Response<List<GetMentorDto>>(HttpStatusCode.InternalServerError, e.Message);
+                return new PageResponse<List<GetMentorDto>>(HttpStatusCode.InternalServerError, e.Message);
             }
         }
 
@@ -110,5 +124,7 @@ namespace Infrastructure.Services.MentorService
                 return new Response<string>(HttpStatusCode.InternalServerError, e.Message);
             }
         }
+
+       
     }
 }

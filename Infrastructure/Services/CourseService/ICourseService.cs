@@ -1,5 +1,6 @@
 ﻿using Domain.DTO_s.CourseDTO;
 using Domain.DTO_s.StudentDTO;
+using Domain.Filters;
 using Domain.Response;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Infrastructure.Services.CourseService
 {
     public interface ICourseService
     {
-        Task<Response<List<GetCourseDto>>> GetCoursesAsync(); 
+        Task<PageResponse<List<GetCourseDto>>> GetCoursesAsync(CourseFilter filter); 
         Task<Response<GetCourseDto>> GetCourseByIdAsync(int id);
         Task<Response<string>> AddCourseAsync(AddCourseDto course);
         Task<Response<string>> UpdateCourseAsync(UpdateCourseDto course);

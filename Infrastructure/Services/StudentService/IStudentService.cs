@@ -1,4 +1,5 @@
 ﻿using Domain.DTO_s.StudentDTO;
+using Domain.Filters;
 using Domain.Response;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Infrastructure.Services.StudentService
 {
     public interface IStudentService
     {
-        Task<Response<List<GetStudentDto>>> GetStudentAsync();
+        Task<PageResponse<List<GetStudentDto>>> GetStudentAsync(StudentFilter filter);
         Task<Response<GetStudentDto>> GetStudentByIdAsync(int id); 
         Task<Response<string>>AddStudentAsync(AddStudentDto studentDto); 
         Task<Response<string>>UpdateStudentAsync(UpdateStudentDto studentDto);  

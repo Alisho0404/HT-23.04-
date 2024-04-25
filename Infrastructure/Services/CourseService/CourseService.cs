@@ -2,6 +2,7 @@
 using Domain.DTO_s.CourseDTO;
 using Domain.DTO_s.GroupDTO;
 using Domain.Enteties;
+using Domain.Filters;
 using Domain.Response;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -81,18 +82,26 @@ namespace Infrastructure.Services.CourseService
             }
         }
 
-        public async Task<Response<List<GetCourseDto>>> GetCoursesAsync()
+        public async Task<PageResponse<List<GetCourseDto>>> GetCoursesAsync(CourseFilter filter)
         {
             try
             {
-                var courses = await _context.Students.ToListAsync();
-                var mapped = _mapper.Map<List<GetCourseDto>>(courses);
-                return new Response<List<GetCourseDto>>(mapped);
+                var course = _context.Courses.AsQueryable();
+                if (!string.IsNullOrEmpty(filter.CourseName))
+                {
+                    course=course.Where(x=>x.CourseName.ToLower().Contains(filter.CourseName.ToLower()));
+                } 
+                var response=await course
+                    .Skip((filter.PageNumber-1)*filter.PageSize)
+                    .Take(filter.PageSize).ToListAsync();
+                var totalRecord = course.Count();
+                var mapped=_mapper.Map<List<GetCourseDto>>(response);
+                return new PageResponse<List<GetCourseDto>>(mapped, filter.PageNumber, filter.PageSize, totalRecord);
             }
 
             catch (Exception ex)
             {
-                return new Response<List<GetCourseDto>>(HttpStatusCode.InternalServerError, ex.Message);
+                return new PageResponse<List<GetCourseDto>>(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 

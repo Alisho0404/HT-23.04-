@@ -2,6 +2,7 @@
 using Domain.DTO_s.GroupDTO;
 using Domain.DTO_s.StudentDTO;
 using Domain.Enteties;
+using Domain.Filters;
 using Domain.Response;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -81,18 +82,26 @@ namespace Infrastructure.Services.GroupService
             }
         }
 
-        public async Task<Response<List<GetGroupDto>>> GetGroupsAsync()
+        public async Task<PageResponse<List<GetGroupDto>>> GetGroupsAsync(GroupFilter filter)
         {
             try
             {
-                var groups = await _context.Students.ToListAsync();
-                var mapped = _mapper.Map<List<GetGroupDto>>(groups);
-                return new Response<List<GetGroupDto>>(mapped);
+                var groups=_context.Groups.AsQueryable();
+                if (!string.IsNullOrEmpty(filter.GroupName))
+                {
+                    groups = groups.Where(x => x.GroupName.ToLower().Contains(filter.GroupName.ToLower()));
+                }
+                var response = await groups
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize).ToListAsync();
+                var totalRecord = groups.Count(); 
+                var mapped=_mapper.Map<List<GetGroupDto>>(response);
+                return new PageResponse<List<GetGroupDto>>(mapped,filter.PageNumber,filter.PageSize,totalRecord);
             }
            
             catch (Exception ex)
             {
-                return new Response<List<GetGroupDto>>(HttpStatusCode.InternalServerError, ex.Message);
+                return new PageResponse<List<GetGroupDto>>(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 

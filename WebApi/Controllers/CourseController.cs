@@ -1,5 +1,6 @@
 ﻿using Domain.DTO_s.CourseDTO;
 using Domain.DTO_s.StudentDTO;
+using Domain.Filters;
 using Domain.Response;
 using Infrastructure.Services.CourseService;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +16,9 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<Response<List<GetCourseDto>>> GetCoursesAsync()
+        public async Task<Response<List<GetCourseDto>>> GetCoursesAsync(CourseFilter filter)
         {
-            return await _CourseService.GetCoursesAsync();
+            return await _CourseService.GetCoursesAsync(filter);
         }
 
         [HttpGet("{courseId:int}")]

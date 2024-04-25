@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Infrastructure.Services.StudentService;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
+using Domain.Filters;
 
 
 
@@ -60,18 +61,31 @@ namespace Infrastructure.Services.StudentService
             return new Response<bool>(true);
         }
 
-        public async Task<Response<List<GetStudentDto>>> GetStudentAsync()
+        public async Task<PageResponse<List<GetStudentDto>>> GetStudentAsync(StudentFilter filter)
         {
             try
-            {
-                var create = await _context.Students.ToListAsync();
-                var mapped = _mapper.Map<List<GetStudentDto>>(create);
-                return new Response<List<GetStudentDto>>(mapped);
+            { 
+                var students=_context.Students.AsQueryable();
+                if (!string.IsNullOrEmpty(filter.Address))
+                {
+                    students = students.Where(x => x.Address.ToLower().Contains(filter.Address!.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filter.Email))
+                {
+                    students = students.Where(x => x.Email.ToLower().Contains(filter.Email!.ToLower()));
+                }
+
+                var response = await students
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize).ToListAsync();
+                var totalRecord = students.Count(); 
+                var mapped=_mapper.Map<List<GetStudentDto>>(response);
+                return new PageResponse<List<GetStudentDto>>(mapped, filter.PageNumber, filter.PageSize, totalRecord);
             }
             catch (Exception e)
             {
-
-                return new Response<List<GetStudentDto>>(HttpStatusCode.InternalServerError, e.Message);    
+                return new PageResponse<List<GetStudentDto>>(HttpStatusCode.InternalServerError, e.Message);
+                
             }
         }
 

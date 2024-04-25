@@ -1,5 +1,6 @@
 ﻿using Domain.DTO_s.GroupDTO;
 using Domain.DTO_s.StudentDTO;
+using Domain.Filters;
 using Domain.Response;
 using Infrastructure.Services.GroupService;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +16,9 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<Response<List<GetGroupDto>>> GetGroupsAsync()
+        public async Task<Response<List<GetGroupDto>>> GetGroupsAsync(GroupFilter filter)
         {
-            return await _GroupService.GetGroupsAsync();
+            return await _GroupService.GetGroupsAsync(filter);
         }
 
         [HttpGet("{GroupId:int}")]

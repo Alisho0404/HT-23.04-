@@ -1,5 +1,6 @@
 ﻿using Domain.DTO_s.MentorDTO;
 using Domain.DTO_s.StudentDTO;
+using Domain.Filters;
 using Domain.Response;
 using Infrastructure.Services.MentorService;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +16,9 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<Response<List<GetMentorDto>>> GetMentorsAsync()
+        public async Task<Response<List<GetMentorDto>>> GetMentorsAsync(MentorFilter filter)
         {
-            return await _MentorService.GetMentorsAsync();
+            return await _MentorService.GetMentorsAsync(filter);
         }
 
         [HttpGet("{MentorId:int}")]
